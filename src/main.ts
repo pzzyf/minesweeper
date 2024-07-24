@@ -11,8 +11,8 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [{
     path: '/',
-    component: () => import('./pages/index.vue')
-  }]
+    component: () => import('./pages/index.vue'),
+  }],
 })
 app.use(router)
 app.mount('#app')
