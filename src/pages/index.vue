@@ -5,8 +5,9 @@ const HEIGHT = 5
 interface BlockState {
   x?: number
   y?: number
-  mine?: boolean
   revealed: boolean
+  mine?: boolean
+  flagged?: boolean
   adjacentMines: number
 }
 
@@ -86,6 +87,12 @@ function expendZero(block: BlockState) {
 
 let mineGenerated = false
 
+function onRightClick(block: BlockState) {
+  if (block.revealed)
+    return
+  block.flagged = !block.flagged
+}
+
 function onClick(block: BlockState) {
   if (!mineGenerated) {
     generateMines(block)
@@ -98,13 +105,15 @@ function onClick(block: BlockState) {
   expendZero(block)
 }
 
-function getBlockClass(item: BlockState) {
-  if (!item.revealed)
+function getBlockClass(block: BlockState) {
+  if (block.flagged)
+    return 'bg-gray-500/10'
+  if (!block.revealed)
     return 'bg-gray-500/10 hover:bg-gray-500/20'
 
-  return item.mine
+  return block.mine
     ? 'bg-red-500/50'
-    : numberColors[item.adjacentMines]
+    : numberColors[block.adjacentMines]
 }
 
 function getSiblings(block: BlockState) {
@@ -128,15 +137,18 @@ updateNumbers()
     </div>
     <div v-for="row, y in state" :key="y" class="flex items-center justify-center">
       <button
-        v-for="item, x in row" :key="x" class="h-10 w-10 flex items-center justify-center border"
-        :class="getBlockClass(item)"
-        @click="onClick(item)"
+        v-for="block, x in row" :key="x" class="h-10 w-10 flex items-center justify-center border"
+        :class="getBlockClass(block)"
+        @click="onClick(block)"
+        @contextmenu.prevent="onRightClick(block)"
       >
-        <template v-if="item.revealed">
-          <div v-if="item.mine" i-mdi-mine />
-
+        <template v-if="block.flagged">
+          <div i-mdi-flag text-red />
+        </template>
+        <template v-else-if="block.revealed">
+          <div v-if="block.mine" i-mdi-mine />
           <div v-else>
-            {{ item.adjacentMines }}
+            {{ block.adjacentMines }}
           </div>
         </template>
       </button>
