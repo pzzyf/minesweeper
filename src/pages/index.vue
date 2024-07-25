@@ -1,3 +1,4 @@
+<!-- eslint-disable no-alert -->
 <script setup lang="ts">
 const WIDTH = 5
 const HEIGHT = 5
@@ -85,7 +86,7 @@ function expendZero(block: BlockState) {
   })
 }
 
-let mineGenerated = false
+const mineGenerated = ref(false)
 
 function onRightClick(block: BlockState) {
   if (block.revealed)
@@ -94,9 +95,9 @@ function onRightClick(block: BlockState) {
 }
 
 function onClick(block: BlockState) {
-  if (!mineGenerated) {
+  if (!mineGenerated.value) {
     generateMines(block)
-    mineGenerated = true
+    mineGenerated.value = true
   }
   block.revealed = true
   if (block.mine)
@@ -127,7 +128,20 @@ function getSiblings(block: BlockState) {
     .filter(Boolean) as BlockState[]
 }
 
-updateNumbers()
+watch([() => state.value, mineGenerated.value], checkGameState, { deep: true, immediate: true })
+
+function checkGameState() {
+  if (!mineGenerated.value)
+    return
+  const blocks = state.value.flat()
+
+  if (blocks.every(block => block.revealed || block.flagged)) {
+    if (blocks.some(block => block.flagged && !block.mine))
+      alert('You cheat!')
+    else
+      alert('You win!')
+  }
+}
 </script>
 
 <template>
@@ -143,10 +157,14 @@ updateNumbers()
         @contextmenu.prevent="onRightClick(block)"
       >
         <template v-if="block.flagged">
-          <div i-mdi-flag text-red />
+          <div i-mdi-flag text-red>
+            🚩
+          </div>
         </template>
         <template v-else-if="block.revealed">
-          <div v-if="block.mine" i-mdi-mine />
+          <div v-if="block.mine" i-mdi-mine>
+            💣
+          </div>
           <div v-else>
             {{ block.adjacentMines }}
           </div>
