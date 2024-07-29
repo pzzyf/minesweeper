@@ -1,16 +1,9 @@
 <!-- eslint-disable no-alert -->
 <script setup lang="ts">
+import type { BlockState } from '~/types.ts'
+
 const WIDTH = 5
 const HEIGHT = 5
-
-interface BlockState {
-  x?: number
-  y?: number
-  revealed: boolean
-  mine?: boolean
-  flagged?: boolean
-  adjacentMines: number
-}
 
 const numberColors = [
   'text-tan-500',
